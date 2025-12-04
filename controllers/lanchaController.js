@@ -26,18 +26,19 @@ exports.addLancha = async (req, res) => {
     }
 };
 
-// Actualizar lancha por matricula
+// Actualizar lancha por id
 exports.updateLancha = async (req, res) => {
+    const { id } = req.params;
     const { nombre, matricula, lanchero, capacidad, foto } = req.body;
     try {
         const [result] = await pool.query(
-            'UPDATE lanchas SET nombre=?, lanchero=?, capacidad=?, foto=? WHERE matricula=?',
-            [nombre, lanchero, capacidad, foto, matricula]
+            'UPDATE lanchas SET nombre=?, matricula=?, lanchero=?, capacidad=?, foto=? WHERE id=?',
+            [nombre, matricula, lanchero, capacidad, foto, id]
         );
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Lancha no encontrada' });
         }
-        res.json({ nombre, matricula, lanchero, capacidad, foto });
+        res.json({ id, nombre, matricula, lanchero, capacidad, foto });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Error al actualizar lancha' });
