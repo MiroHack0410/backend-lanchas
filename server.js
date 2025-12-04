@@ -8,8 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors());           // Permite que tu app Android haga requests
-app.use(bodyParser.json()); 
+app.use(cors());
+app.use(bodyParser.json());
 
 // Rutas
 app.use('/api', lanchaRoutes);
