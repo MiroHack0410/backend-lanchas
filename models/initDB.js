@@ -2,37 +2,31 @@ const pool = require("./db");
 
 const initDB = async () => {
     try {
-        // Crear tabla si no existe
+        // Eliminar tabla existente si existe
+        await pool.query(`DROP TABLE IF EXISTS lanchas;`);
+        console.log("🗑 Tabla 'lanchas' eliminada si existía.");
+
+        // Crear tabla nueva
         await pool.query(`
-            CREATE TABLE IF NOT EXISTS lanchas (
-                nombre VARCHAR(100) PRIMARY KEY,
+            CREATE TABLE lanchas (
+                id SERIAL PRIMARY KEY,
+                nombre VARCHAR(100),
                 matricula VARCHAR(50),
                 lanchero VARCHAR(100),
-                capacidad INTEGER
+                capacidad INTEGER,
+                foto TEXT
             );
         `);
+        console.log("✅ Nueva tabla 'lanchas' creada con columna 'id'.");
 
-        // Agregar columna foto si no existe
+        // Insertar ejemplos
         await pool.query(`
-            ALTER TABLE lanchas 
-            ADD COLUMN IF NOT EXISTS foto TEXT;
+            INSERT INTO lanchas (nombre, matricula, lanchero, capacidad, foto)
+            VALUES 
+            ('Lancha Tiburón', 'MX-1234', 'Juan Pérez', 10, 'https://example.com/tiburon.jpg'),
+            ('Lancha El Rayo', 'MX-5678', 'Carlos Ramírez', 8, 'https://example.com/rayo.jpg');
         `);
-
-        console.log("✅ Tabla 'lanchas' lista con la columna 'foto'.");
-
-        // Insertar ejemplo SOLO si está vacía
-        const result = await pool.query("SELECT COUNT(*) FROM lanchas");
-
-        if (result.rows[0].count === "0") {
-            await pool.query(`
-                INSERT INTO lanchas (nombre, matricula, lanchero, capacidad, foto)
-                VALUES 
-                ('Lancha Tiburón', 'MX-1234', 'Juan Pérez', 10, 'https://example.com/tiburon.jpg'),
-                ('Lancha El Rayo', 'MX-5678', 'Carlos Ramírez', 8, 'https://example.com/rayo.jpg');
-            `);
-
-            console.log("🌱 Ejemplos insertados en la tabla.");
-        }
+        console.log("🌱 Ejemplos insertados en la nueva tabla.");
 
     } catch (err) {
         console.error("❌ Error al inicializar la base de datos:", err);
@@ -42,4 +36,5 @@ const initDB = async () => {
 initDB();
 
 module.exports = initDB;
+
 
