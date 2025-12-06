@@ -8,10 +8,10 @@ module.exports = {
         return rows;
     },
 
-    // Obtener una lancha por nombre
-    obtenerPorNombre: async (nombre) => {
-        const query = "SELECT * FROM lanchas WHERE nombre = $1";
-        const { rows } = await pool.query(query, [nombre]);
+    // Obtener una lancha por ID
+    obtenerPorId: async (id) => {
+        const query = "SELECT * FROM lanchas WHERE id = $1";
+        const { rows } = await pool.query(query, [id]);
         return rows[0] || null;
     },
 
@@ -34,27 +34,35 @@ module.exports = {
         return rows[0];
     },
 
-    // Actualizar lancha por nombre
-    actualizarLancha: async (nombre, datos) => {
+    // Actualizar lancha por ID
+    actualizarLancha: async (id, datos) => {
         const query = `
             UPDATE lanchas
-            SET matricula = $1,
-                lanchero = $2,
-                capacidad = $3,
-                foto = $4
-            WHERE nombre = $5
+            SET nombre = $1,
+                matricula = $2,
+                lanchero = $3,
+                capacidad = $4,
+                foto = $5
+            WHERE id = $6
             RETURNING *
         `;
-
         const values = [
+            datos.nombre,
             datos.matricula,
             datos.lanchero,
             datos.capacidad,
             datos.foto || null,
-            nombre
+            id
         ];
 
         const { rows } = await pool.query(query, values);
+        return rows[0] || null;
+    },
+
+    // Eliminar lancha por ID
+    eliminarLancha: async (id) => {
+        const query = "DELETE FROM lanchas WHERE id = $1 RETURNING *";
+        const { rows } = await pool.query(query, [id]);
         return rows[0] || null;
     }
 };
