@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const lanchaRoutes = require('./routes/lanchaRoutes');
-const initDB = require("./utils/initDB");
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Inicializar BD
+require('./models/initDB');
 
 // Middlewares
 app.use(cors());
@@ -18,8 +20,6 @@ app.use('/api', lanchaRoutes);
 app.get("/", (req, res) => {
     res.send("Backend funcionando correctamente 🚤");
 });
-
-require('./models/initDB');
 
 // Servidor
 app.listen(PORT, () => {
