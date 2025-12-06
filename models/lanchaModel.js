@@ -1,24 +1,55 @@
-const pool = require("./db");
+const db = require("./db");
 
-class LanchaModel {
-    static async obtenerLanchas() {
-        const { rows } = await pool.query("SELECT * FROM lanchas");
-        return rows;
+module.exports = {
+    // Obtener todas las lanchas
+    obtenerLanchas: () => {
+        return new Promise((resolve, reject) => {
+            db.all("SELECT * FROM lanchas", [], (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows);
+            });
+        });
+    },
+
+    // Crear una lancha NUEVA
+    crearLancha: (lancha) => {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                INSERT INTO lanchas (nombre, matricula, lanchero, capacidad)
+                VALUES (?, ?, ?, ?)
+            `;
+
+            db.run(sql,
+                [lancha.nombre, lancha.matricula, lancha.lanchero, lancha.capacidad],
+                function (err) {
+                    if (err) reject(err);
+                    else resolve(lancha);
+                }
+            );
+        });
+    },
+
+    // Actualizar lancha por nombre
+    actualizarLancha: (nombre, datos) => {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                UPDATE lanchas
+                SET matricula = ?, lanchero = ?, capacidad = ?
+                WHERE nombre = ?
+            `;
+
+            db.run(sql,
+                [datos.matricula, datos.lanchero, datos.capacidad, nombre],
+                function (err) {
+                    if (err) reject(err);
+
+                    if (this.changes === 0) {
+                        resolve(null); // No encontró
+                    } else {
+                        resolve({ nombre, ...datos });
+                    }
+                }
+            );
+        });
     }
-
-    static async crearLancha(data) {
-        const { nombre, matricula, lanchero, capacidad } = data;
-
-        const query = `
-            INSERT INTO lanchas (nombre, matricula, lanchero, capacidad)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *;
-        `;
-        const values = [nombre, matricula, lanchero, capacidad];
-
-        const { rows } = await pool.query(query, values);
-        return rows[0];
-    }
-}
-
-module.exports = LanchaModel;
+};
