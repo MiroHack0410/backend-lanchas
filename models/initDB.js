@@ -1,35 +1,36 @@
-const pool = require("./models/db");
+const pool = require("./db");
 
-async function initDB() {
-    const createTable = `
-        CREATE TABLE IF NOT EXISTS lanchas (
-            nombre TEXT NOT NULL,
-            matricula TEXT NOT NULL,
-            lanchero TEXT NOT NULL,
-            capacidad INTEGER NOT NULL
-        );
-    `;
-
-    const insertExamples = `
-        INSERT INTO lanchas (nombre, matricula, lanchero, capacidad)
-        VALUES
-        ('La Sirenita', 'MX-001', 'Don Miguel', 8),
-        ('El Delfín Azul', 'MX-002', 'Pedro Sánchez', 10),
-        ('Amanecer', 'MX-003', 'Juan López', 6)
-    `;
-    
+const initDB = async () => {
     try {
-        await pool.query(createTable);
-        console.log("✔ Tabla creada correctamente");
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS lanchas (
+                nombre VARCHAR(100) NOT NULL,
+                matricula VARCHAR(50) NOT NULL,
+                lanchero VARCHAR(100) NOT NULL,
+                capacidad INTEGER NOT NULL
+            );
+        `);
 
-        await pool.query(insertExamples);
-        console.log("✔ Datos de ejemplo insertados");
+        console.log("✅ Tabla 'lanchas' creada o ya existente.");
 
-        process.exit(0);
+        // Insertar ejemplo SOLO si está vacía
+        const result = await pool.query("SELECT COUNT(*) FROM lanchas");
+        if (result.rows[0].count === "0") {
+            await pool.query(`
+                INSERT INTO lanchas (nombre, matricula, lanchero, capacidad)
+                VALUES 
+                ('Lancha Tiburón', 'MX-1234', 'Juan Pérez', 10),
+                ('Lancha El Rayo', 'MX-5678', 'Carlos Ramírez', 8);
+            `);
+
+            console.log("🌱 Ejemplos insertados en la tabla.");
+        }
+
     } catch (err) {
-        console.error("❌ Error al crear la BD:", err);
-        process.exit(1);
+        console.error("❌ Error al crear la tabla:", err);
     }
-}
+};
 
 initDB();
+
+module.exports = initDB;
