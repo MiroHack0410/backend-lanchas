@@ -1,55 +1,53 @@
-const db = require("./db");
+const pool = require("./db");
 
 module.exports = {
     // Obtener todas las lanchas
-    obtenerLanchas: () => {
-        return new Promise((resolve, reject) => {
-            db.all("SELECT * FROM lanchas", [], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
+    obtenerLanchas: async () => {
+        const query = "SELECT * FROM lanchas";
+        const { rows } = await pool.query(query);
+        return rows;
     },
 
-    // Crear una lancha NUEVA
-    crearLancha: (lancha) => {
-        return new Promise((resolve, reject) => {
-            const sql = `
-                INSERT INTO lanchas (nombre, matricula, lanchero, capacidad)
-                VALUES (?, ?, ?, ?)
-            `;
+    // Crear lancha NUEVA (usando nombre como clave)
+    crearLancha: async (lancha) => {
+        const query = `
+            INSERT INTO lanchas (nombre, matricula, lanchero, capacidad)
+            VALUES ($1, $2, $3, $4)
+            RETURNING *
+        `;
+        const values = [
+            lancha.nombre,
+            lancha.matricula,
+            lancha.lanchero,
+            lancha.capacidad,
+        ];
 
-            db.run(sql,
-                [lancha.nombre, lancha.matricula, lancha.lanchero, lancha.capacidad],
-                function (err) {
-                    if (err) reject(err);
-                    else resolve(lancha);
-                }
-            );
-        });
+        const { rows } = await pool.query(query, values);
+        return rows[0];
     },
 
     // Actualizar lancha por nombre
-    actualizarLancha: (nombre, datos) => {
-        return new Promise((resolve, reject) => {
-            const sql = `
-                UPDATE lanchas
-                SET matricula = ?, lanchero = ?, capacidad = ?
-                WHERE nombre = ?
-            `;
+    actualizarLancha: async (nombre, datos) => {
+        const query = `
+            UPDATE lanchas
+            SET matricula = $1,
+                lanchero = $2,
+                capacidad = $3
+            WHERE nombre = $4
+            RETURNING *
+        `;
 
-            db.run(sql,
-                [datos.matricula, datos.lanchero, datos.capacidad, nombre],
-                function (err) {
-                    if (err) reject(err);
+        const values = [
+            datos.matricula,
+            datos.lanchero,
+            datos.capacidad,
+            nombre
+        ];
 
-                    if (this.changes === 0) {
-                        resolve(null); // No encontró
-                    } else {
-                        resolve({ nombre, ...datos });
-                    }
-                }
-            );
-        });
+        const { rows } = await pool.query(query, values);
+
+        if (rows.length === 0) return null; // No existe
+
+        return rows[0];
     }
 };
