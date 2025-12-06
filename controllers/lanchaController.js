@@ -3,7 +3,7 @@ const pool = require('../models/db');
 // Obtener todas las lanchas
 exports.getLanchas = async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM lanchas ORDER BY matricula ASC');
+        const result = await pool.query('SELECT * FROM lanchas ORDER BY id ASC');
         res.json(result.rows);
     } catch (err) {
         console.error("Error en getLanchas:", err);
@@ -30,17 +30,18 @@ exports.addLancha = async (req, res) => {
     }
 };
 
-// Actualizar lancha
+// Actualizar lancha por ID
 exports.updateLancha = async (req, res) => {
+    const { id } = req.params;
     const { nombre, matricula, lanchero, capacidad, foto } = req.body;
 
     try {
         const result = await pool.query(
             `UPDATE lanchas
-             SET nombre=$1, lanchero=$2, capacidad=$3, foto=$4
-             WHERE matricula=$5
+             SET nombre=$1, matricula=$2, lanchero=$3, capacidad=$4, foto=$5
+             WHERE id=$6
              RETURNING *`,
-            [nombre, lanchero, capacidad, foto, matricula]
+            [nombre, matricula, lanchero, capacidad, foto, id]
         );
 
         if (result.rowCount === 0) {
@@ -51,5 +52,26 @@ exports.updateLancha = async (req, res) => {
     } catch (err) {
         console.error("Error en updateLancha:", err);
         res.status(500).json({ error: 'Error al actualizar lancha' });
+    }
+};
+
+// Eliminar lancha por ID
+exports.deleteLancha = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query(
+            `DELETE FROM lanchas WHERE id=$1 RETURNING *`,
+            [id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Lancha no encontrada" });
+        }
+
+        res.json({ message: "Lancha eliminada", lancha: result.rows[0] });
+    } catch (err) {
+        console.error("Error en deleteLancha:", err);
+        res.status(500).json({ error: 'Error al eliminar lancha' });
     }
 };
