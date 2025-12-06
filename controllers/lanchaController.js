@@ -1,65 +1,59 @@
 const pool = require('../models/db');
 
-// Obtener todas las lanchas
+// Obtener todas
 exports.getLanchas = async (req, res) => {
     try {
-        console.log("GET /lanchas llamado"); // log para debug
-        const [rows] = await pool.query('SELECT * FROM lanchas ORDER BY id ASC');
-        console.log("Lanchas obtenidas:", rows);
-        res.json(rows);
+        const result = await pool.query('SELECT * FROM lanchas ORDER BY matricula ASC');
+        res.json(result.rows);
     } catch (err) {
         console.error("Error en getLanchas:", err);
         res.status(500).json({ error: 'Error al obtener lanchas' });
     }
 };
 
-// Agregar una lancha
+// Agregar
 exports.addLancha = async (req, res) => {
     const { nombre, matricula, lanchero, capacidad, foto } = req.body;
-    console.log("POST /lanchas llamado con:", req.body); // log para debug
-
-    // Validaciones básicas
-    if (!nombre || !matricula || !lanchero || !capacidad) {
-        console.warn("Faltan datos para agregar lancha");
-        return res.status(400).json({ error: "Faltan datos requeridos" });
-    }
 
     try {
-        const [result] = await pool.query(
-            'INSERT INTO lanchas (nombre, matricula, lanchero, capacidad, foto) VALUES (?, ?, ?, ?, ?)',
-            [nombre, matricula, lanchero, capacidad, foto]
+        const result = await pool.query(
+            `INSERT INTO lanchas (matricula, nombre, lanchero, capacidad, foto)
+             VALUES ($1, $2, $3, $4, $5)
+             RETURNING *`,
+            [matricula, nombre, lanchero, capacidad, foto]
         );
-        console.log("Lancha agregada con id:", result.insertId);
-        res.status(201).json({ id: result.insertId, nombre, matricula, lanchero, capacidad, foto });
+
+        res.status(201).json(result.rows[0]);
+
     } catch (err) {
         console.error("Error en addLancha:", err);
         res.status(500).json({ error: 'Error al agregar lancha' });
     }
 };
 
-// Actualizar lancha por id
+// Actualizar
 exports.updateLancha = async (req, res) => {
-    const { id } = req.params;
     const { nombre, matricula, lanchero, capacidad, foto } = req.body;
-    console.log(`PUT /lanchas/${id} llamado con:`, req.body);
-
-    if (!nombre || !matricula || !lanchero || !capacidad) {
-        console.warn("Faltan datos para actualizar lancha");
-        return res.status(400).json({ error: "Faltan datos requeridos" });
-    }
 
     try {
-        const [result] = await pool.query(
-            'UPDATE lanchas SET nombre=?, matricula=?, lanchero=?, capacidad=?, foto=? WHERE id=?',
-            [nombre, matricula, lanchero, capacidad, foto, id]
+        const result = await pool.query(
+            `UPDATE lanchas
+             SET nombre=$1, lanchero=$2, capacidad=$3, foto=$4
+             WHERE matricula=$5
+             RETURNING *`,
+            [nombre, lanchero, capacidad, foto, matricula]
         );
-        if (result.affectedRows === 0) {
-            console.warn("Lancha no encontrada con id:", id);
-            return res.status(404).json({ error: 'Lancha no encontrada' });
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: "Lancha no encontrada" });
         }
-        console.log("Lancha actualizada con id:", id);
-        res.json({ id, nombre, matricula, lanchero, capacidad, foto });
+
+        res.json(result.rows[0]);
     } catch (err) {
+        console.error("Error en updateLancha:", err);
+        res.status(500).json({ error: 'Error al actualizar lancha' });
+    }
+};
         console.error("Error en updateLancha:", err);
         res.status(500).json({ error: 'Error al actualizar lancha' });
     }
