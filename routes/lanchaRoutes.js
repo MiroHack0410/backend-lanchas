@@ -12,10 +12,10 @@ router.get('/lanchas', async (req, res) => {
     }
 });
 
-// Obtener lancha por nombre
-router.get('/lanchas/:nombre', async (req, res) => {
+// Obtener lancha por ID
+router.get('/lanchas/:id', async (req, res) => {
     try {
-        const lancha = await LanchaModel.obtenerPorNombre(req.params.nombre);
+        const lancha = await LanchaModel.obtenerPorId(req.params.id);
 
         if (!lancha) {
             return res.status(404).json({ error: "Lancha no encontrada" });
@@ -31,16 +31,16 @@ router.get('/lanchas/:nombre', async (req, res) => {
 router.post('/lanchas', async (req, res) => {
     try {
         const nueva = await LanchaModel.crearLancha(req.body);
-        res.json(nueva);
+        res.status(201).json(nueva);
     } catch (error) {
         res.status(500).json({ error: "Error al crear lancha" });
     }
 });
 
-// Actualizar lancha por nombre
-router.put('/lanchas/:nombre', async (req, res) => {
+// Actualizar lancha por ID
+router.put('/lanchas/:id', async (req, res) => {
     try {
-        const lancha = await LanchaModel.actualizarLancha(req.params.nombre, req.body);
+        const lancha = await LanchaModel.actualizarLancha(req.params.id, req.body);
 
         if (!lancha) {
             return res.status(404).json({ error: "Lancha no encontrada" });
@@ -49,6 +49,21 @@ router.put('/lanchas/:nombre', async (req, res) => {
         res.json(lancha);
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar lancha" });
+    }
+});
+
+// Eliminar lancha por ID
+router.delete('/lanchas/:id', async (req, res) => {
+    try {
+        const lancha = await LanchaModel.eliminarLancha(req.params.id);
+
+        if (!lancha) {
+            return res.status(404).json({ error: "Lancha no encontrada" });
+        }
+
+        res.json({ message: "Lancha eliminada", lancha });
+    } catch (error) {
+        res.status(500).json({ error: "Error al eliminar lancha" });
     }
 });
 
