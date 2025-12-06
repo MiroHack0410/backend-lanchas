@@ -19,9 +19,6 @@ app.get("/", (req, res) => {
     res.send("Backend funcionando correctamente 🚤");
 });
 
-// Inicializar BD
-initDB();  // <-- ESTA LÍNEA ES LO QUE FALTABA
-
 // Servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
