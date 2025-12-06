@@ -12,7 +12,7 @@ router.get('/lanchas', async (req, res) => {
     }
 });
 
-// Crear lancha
+// Insertar lancha
 router.post('/lanchas', async (req, res) => {
     try {
         const nueva = await LanchaModel.crearLancha(req.body);
@@ -22,19 +22,19 @@ router.post('/lanchas', async (req, res) => {
     }
 });
 
-// 🔥 ACTUALIZAR lancha por nombre
+// Actualizar lancha por nombre
 router.put('/lanchas/:nombre', async (req, res) => {
     try {
         const nombre = req.params.nombre;
         const datos = req.body;
 
-        const actualizada = await LanchaModel.actualizarLancha(nombre, datos);
+        const lancha = await LanchaModel.actualizarLancha(nombre, datos);
 
-        if (!actualizada) {
+        if (!lancha) {
             return res.status(404).json({ error: "Lancha no encontrada" });
         }
 
-        res.json(actualizada);
+        res.json(lancha);
     } catch (error) {
         res.status(500).json({ error: "Error al actualizar lancha" });
     }
