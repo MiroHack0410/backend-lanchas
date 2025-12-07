@@ -2,31 +2,24 @@ const pool = require("./db");
 
 const initDB = async () => {
     try {
-        // Eliminar tabla existente si existe
-        await pool.query(`DROP TABLE IF EXISTS lanchas;`);
-        console.log("🗑 Tabla 'lanchas' eliminada si existía.");
-
-        // Crear tabla nueva
+        // Crear tabla usuarios si no existe
         await pool.query(`
-            CREATE TABLE lanchas (
+            CREATE TABLE IF NOT EXISTS usuarios (
                 id SERIAL PRIMARY KEY,
-                nombre VARCHAR(100),
-                matricula VARCHAR(50),
-                lanchero VARCHAR(100),
-                capacidad INTEGER,
-                foto TEXT
+                usuario VARCHAR(100) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL
             );
         `);
-        console.log("✅ Nueva tabla 'lanchas' creada con columna 'id'.");
+        console.log("✅ Tabla 'usuarios' lista.");
 
-        // Insertar ejemplos
+        // Insertar usuario admin si no existe
         await pool.query(`
-            INSERT INTO lanchas (nombre, matricula, lanchero, capacidad, foto)
-            VALUES 
-            ('Lancha Tiburón', 'MX-1234', 'Juan Pérez', 10, 'https://example.com/tiburon.jpg'),
-            ('Lancha El Rayo', 'MX-5678', 'Carlos Ramírez', 8, 'https://example.com/rayo.jpg');
+            INSERT INTO usuarios (usuario, password)
+            VALUES ('admin', '12345')
+            ON CONFLICT (usuario) DO NOTHING;
         `);
-        console.log("🌱 Ejemplos insertados en la nueva tabla.");
+
+        console.log("👤 Usuario admin agregado (o ya existía).");
 
     } catch (err) {
         console.error("❌ Error al inicializar la base de datos:", err);
@@ -36,5 +29,3 @@ const initDB = async () => {
 initDB();
 
 module.exports = initDB;
-
-
