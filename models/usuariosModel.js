@@ -1,23 +1,25 @@
-const db = require('./db');
+const db = require('../db');
 
 const usuariosModel = {
-
     async iniciarSesion(usuario, password) {
         try {
-            const result = await db.query(
-                "SELECT * FROM usuarios WHERE usuario = $1 AND password = $2",
-                [usuario, password]
-            );
+            const query = `
+                SELECT *
+                FROM usuarios
+                WHERE usuario = $1 AND password = $2
+            `;
 
-            // result.rows es el arreglo correcto en PostgreSQL
+            const values = [usuario, password];
+
+            const result = await db.query(query, values);
+
             return result.rows[0] || null;
 
-        } catch (err) {
-            console.error("🔥 Error en iniciarSesion:", err);
-            throw err;
+        } catch (error) {
+            console.error("Error en iniciarSesion:", error);
+            throw error;
         }
     }
-
 };
 
 module.exports = usuariosModel;
