@@ -1,4 +1,4 @@
-const pool = require("./db");
+const pool = require('./db');
 
 module.exports = {
     // Obtener todas las lanchas
@@ -66,3 +66,4 @@ module.exports = {
         return rows[0] || null;
     }
 };
+
