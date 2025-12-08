@@ -23,4 +23,3 @@ const usuariosModel = {
 };
 
 module.exports = usuariosModel;
-
