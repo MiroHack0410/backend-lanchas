@@ -1,4 +1,4 @@
-const db = require('./db');
+const db = require('./db.js');
 
 const usuariosModel = {
     async iniciarSesion(usuario, password) {
@@ -10,7 +10,6 @@ const usuariosModel = {
             `;
 
             const values = [usuario, password];
-
             const result = await db.query(query, values);
 
             return result.rows[0] || null;
