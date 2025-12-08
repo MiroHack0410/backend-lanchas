@@ -9,19 +9,6 @@ const usuariosModel = {
         );
 
         return rows[0] || null; // Devuelve el usuario si existe
-    },
-
-    async crearUsuario(usuario, password) {
-        const [result] = await db.query(
-            "INSERT INTO usuarios (usuario, password) VALUES (?, ?)",
-            [usuario, password]
-        );
-
-        return {
-            id: result.insertId,
-            usuario,
-            password
-        };
     }
 
 };
