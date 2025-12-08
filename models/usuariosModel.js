@@ -3,12 +3,19 @@ const db = require('./db');
 const usuariosModel = {
 
     async iniciarSesion(usuario, password) {
-        const [rows] = await db.query(
-            "SELECT * FROM usuarios WHERE usuario = ? AND password = ?",
-            [usuario, password]
-        );
+        try {
+            const result = await db.query(
+                "SELECT * FROM usuarios WHERE usuario = $1 AND password = $2",
+                [usuario, password]
+            );
 
-        return rows[0] || null; // Devuelve el usuario si existe
+            // result.rows es el arreglo correcto en PostgreSQL
+            return result.rows[0] || null;
+
+        } catch (err) {
+            console.error("🔥 Error en iniciarSesion:", err);
+            throw err;
+        }
     }
 
 };
