@@ -36,7 +36,8 @@ router.post("/registro", async (req, res) => {
             });
         }
 
-        const nuevoUsuario = await usuariosModel.crearCuenta(usuario, password);
+        // 🔥 AQUI ESTABA EL ERROR
+        const nuevoUsuario = await usuariosModel.crearUsuario(usuario, password);
 
         return res.json({
             success: true,
