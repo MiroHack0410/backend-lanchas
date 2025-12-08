@@ -24,36 +24,5 @@ router.post("/login", async (req, res) => {
     });
 });
 
-// 🔹 REGISTRO
-router.post("/registro", async (req, res) => {
-    try {
-        const { usuario, password } = req.body;
-
-        if (!usuario || !password) {
-            return res.json({
-                success: false,
-                message: "Faltan datos"
-            });
-        }
-
-        // 🔥 AQUI ESTABA EL ERROR
-        const nuevoUsuario = await usuariosModel.crearUsuario(usuario, password);
-
-        return res.json({
-            success: true,
-            message: "Registro exitoso",
-            id: nuevoUsuario.id,
-            usuario: nuevoUsuario.usuario
-        });
-
-    } catch (error) {
-        console.error("🔥 Error al registrar:", error);
-
-        return res.json({
-            success: false,
-            message: "Error interno al registrar"
-        });
-    }
-});
-
 module.exports = router;
+
