@@ -1,4 +1,4 @@
-const db = require('../database');
+const db = require('./db');
 
 const usuariosModel = {
 
@@ -29,5 +29,6 @@ const usuariosModel = {
 module.exports = usuariosModel;
 
 module.exports = router;
+
 
 
