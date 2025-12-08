@@ -1,32 +1,50 @@
-const pool = require("./db");
+const express = require("express");
+const router = express.Router();
+const usuariosModel = require("../models/usuariosModel");
 
-module.exports = {
+// LOGIN
+router.post("/login", async (req, res) => {
+    const { usuario, password } = req.body;
 
-    // 🔹 Iniciar sesión
-    iniciarSesion: async (usuario, password) => {
-        const query = `
-            SELECT * FROM usuarios
-            WHERE usuario = $1 AND password = $2
-        `;
-        const { rows } = await pool.query(query, [usuario, password]);
-        return rows[0] || null;
-    },
-
-    // 🔹 Crear cuenta (para CrearCuentaActivity)
-    crearCuenta: async (nombre, matricula, lanchero, capacidad) => {
-        const query = `
-            INSERT INTO usuarios (nombre, matricula, lanchero, capacidad)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *
-        `;
-
-        const { rows } = await pool.query(query, [
-            nombre,
-            matricula,
-            lanchero,
-            capacidad
-        ]);
-
-        return rows[0]; // retorna el usuario creado
+    if (!usuario || !password) {
+        return res.json({ success: false, message: "Faltan datos" });
     }
-};
+
+    const user = await usuariosModel.iniciarSesion(usuario, password);
+
+    if (!user) {
+        return res.json({ success: false, message: "Credenciales inválidas" });
+    }
+
+    res.json({
+        success: true,
+        usuario: user.usuario,
+        id: user.id
+    });
+});
+
+// CREAR CUENTA
+router.post("/crear", async (req, res) => {
+    const { usuario, password } = req.body;
+
+    if (!usuario || !password) {
+        return res.json({ success: false, message: "Faltan datos" });
+    }
+
+    try {
+        const newUser = await usuariosModel.crearCuenta(usuario, password);
+
+        res.json({
+            success: true,
+            usuario: newUser.usuario,
+            id: newUser.id
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: "Error al crear usuario: " + error.message
+        });
+    }
+});
+
+module.exports = router;
