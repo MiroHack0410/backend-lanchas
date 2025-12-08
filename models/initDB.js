@@ -1,4 +1,4 @@
-const pool = require("./db");
+const pool = require('./db');
 
 const initDB = async () => {
     try {
@@ -11,3 +11,4 @@ const initDB = async () => {
 initDB();
 
 module.exports = initDB;
+
