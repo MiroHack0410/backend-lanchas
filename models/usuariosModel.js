@@ -1,65 +1,51 @@
 const express = require("express");
 const router = express.Router();
-const { iniciarSesion, crearCuenta } = require("../models/usuarios");
+const usuariosModel = require("../models/usuariosModel");
 
-// 🔹 REGISTRO
-router.post("/registro", async (req, res) => {
-    try {
-        const { usuario, password } = req.body;
+// LOGIN
+router.post("/login", async (req, res) => {
+    const { usuario, password } = req.body;
 
-        if (!usuario || !password) {
-            return res.json({
-                success: false,
-                message: "Faltan datos"
-            });
-        }
-
-        const nuevoUsuario = await crearCuenta(usuario, password);
-
-        return res.json({
-            success: true,
-            message: "Registro exitoso",
-            data: nuevoUsuario
-        });
-
-    } catch (error) {
-        console.error("🔥 Error en registro:", error);
-
-        return res.json({
-            success: false,
-            message: "Error interno"
-        });
+    if (!usuario || !password) {
+        return res.json({ success: false, message: "Faltan datos" });
     }
+
+    const user = await usuariosModel.iniciarSesion(usuario, password);
+
+    if (!user) {
+        return res.json({ success: false, message: "Credenciales inválidas" });
+    }
+
+    res.json({
+        success: true,
+        usuario: user.usuario,
+        id: user.id
+    });
 });
 
-// 🔹 LOGIN
-router.post("/login", async (req, res) => {
+// CREAR CUENTA
+router.post("/crear", async (req, res) => {
+    const { usuario, password } = req.body;
+
+    if (!usuario || !password) {
+        return res.json({ success: false, message: "Faltan datos" });
+    }
+
     try {
-        const { usuario, password } = req.body;
+        const newUser = await usuariosModel.crearCuenta(usuario, password);
 
-        const user = await iniciarSesion(usuario, password);
-
-        if (!user) {
-            return res.json({
-                success: false,
-                message: "Usuario o contraseña incorrectos"
-            });
-        }
-
-        return res.json({
+        res.json({
             success: true,
-            message: "Inicio de sesión exitoso",
-            data: user
+            usuario: newUser.usuario,
+            id: newUser.id
         });
-
     } catch (error) {
-        console.error("🔥 Error en login:", error);
-
-        return res.json({
+        res.json({
             success: false,
-            message: "Error interno"
+            message: "Error al crear usuario: " + error.message
         });
     }
 });
 
 module.exports = router;
+
