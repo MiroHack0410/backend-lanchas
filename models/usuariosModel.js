@@ -1,4 +1,4 @@
-const db = require('./db.js');
+const db = require('./db');
 
 const usuariosModel = {
     async iniciarSesion(usuario, password) {
@@ -22,3 +22,4 @@ const usuariosModel = {
 };
 
 module.exports = usuariosModel;
+
