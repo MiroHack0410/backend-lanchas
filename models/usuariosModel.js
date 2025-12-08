@@ -27,8 +27,3 @@ const usuariosModel = {
 };
 
 module.exports = usuariosModel;
-
-module.exports = router;
-
-
-
